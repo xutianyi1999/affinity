@@ -48,6 +48,12 @@ cfg_if::cfg_if! {
 pub fn set_thread_affinity<B: AsRef<[usize]>>(core_ids: B) -> Result<()> {
     os::set_thread_affinity(core_ids.as_ref())
 }
+
+#[cfg(target_os = "linux")]
+pub fn set_thread_affinity_with_pid<B: AsRef<[usize]>>(pid: i32, core_ids: B) -> Result<()> {
+    os::set_thread_affinity_with_pid(pid, core_ids.as_ref())
+}
+
 /// Returns a list of cores that the current __thread__ is bound to
 pub fn get_thread_affinity() -> Result<Vec<usize>> {
     os::get_thread_affinity()

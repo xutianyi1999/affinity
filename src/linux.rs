@@ -2,7 +2,7 @@ use crate::Result;
 use ::libc::*;
 use std::mem::{size_of, zeroed};
 
-pub fn set_thread_affinity(core_ids: &[usize]) -> Result<()> {
+pub fn set_thread_affinity_with_pid(pid: i32, core_ids: &[usize]) -> Result<()> {
     let mut set: cpu_set_t = unsafe { zeroed() };
     unsafe {
         for core_id in core_ids {
@@ -10,13 +10,17 @@ pub fn set_thread_affinity(core_ids: &[usize]) -> Result<()> {
         }
     }
 
-    if let Err(e) = _sched_setaffinity(0, size_of::<cpu_set_t>(), &set) {
+    if let Err(e) = _sched_setaffinity(pid, size_of::<cpu_set_t>(), &set) {
         return Err(From::from(format!(
             "sched_setaffinity failed with errno {}",
             e
         )));
     }
     Ok(())
+}
+
+pub fn set_thread_affinity(core_ids: &[usize]) -> Result<()> {
+    set_thread_affinity_with_pid(0, core_ids)
 }
 
 pub fn get_thread_affinity() -> Result<Vec<usize>> {
